@@ -30,23 +30,46 @@ model.add(Activation('relu'))
 
 # Pooling layer 1 (max pooling) output shape (32, 126, 7)
 model.add(MaxPooling2D(
-    pool_size=2,
+    pool_size=(2, 1),
     strides=2,
     padding='same',    # Padding method
     data_format='channels_first',
 ))
 
+<<<<<<< HEAD
+# Conv layer 2 output shape
+model.add(Convolution2D(64, (2, 1), strides=1, padding='same', data_format='channels_first'))
+model.add(Activation('softmax'))
+
+# Pooling layer 2 (max pooling) output shape
+model.add(MaxPooling2D((2, 1), 2, 'same', data_format='channels_first'))
+
+# Conv layer 3 output shape
+model.add(Convolution2D(128, (2, 1), strides=1, padding='same', data_format='channels_first'))
+model.add(Activation('softmax'))
+
+# Pooling layer 3 (max pooling) output shape (64, 63, 3)
+model.add(MaxPooling2D((2, 1), 2, 'same', data_format='channels_first'))
+
+# Conv layer 3 output shape
+model.add(Convolution2D(256, (2, 1), strides=1, padding='same', data_format='channels_first'))
+model.add(Activation('softmax'))
+
+# Pooling layer 3 (max pooling) output shape (64, 63, 3)
+model.add(MaxPooling2D((2, 1), 2, 'same', data_format='channels_first'))
+=======
 # Conv layer 2 output shape (64, 126, 7)
 model.add(Convolution2D(64, 5, strides=1, padding='same', data_format='channels_first'))
 model.add(Activation('relu'))
 
 # Pooling layer 2 (max pooling) output shape (64, 63, 3)
 model.add(MaxPooling2D(2, 2, 'same', data_format='channels_first'))
+>>>>>>> parent of 4258c37... 180109
 
 # Fully connected layer 1 input shape (64 * 7 * 7) = (3136), output shape (1024)
 model.add(Flatten())
 model.add(Dense(1024))
-model.add(Activation('relu'))
+model.add(Activation('softmax'))
 
 # Fully connected layer 2 to shape (10) for 10 classes
 model.add(Dense(25))
@@ -66,7 +89,11 @@ model.compile(optimizer=adam,
 
 print('Training ------------')
 # Another way to train the model
+<<<<<<< HEAD
+model.fit(X_train, y_train, epochs=5, batch_size=12,)
+=======
 model.fit(X_train, y_train, epochs=1, batch_size=64,)
+>>>>>>> parent of 4258c37... 180109
 
 print('\nTesting ------------')
 # Evaluate the model with the metrics we defined earlier

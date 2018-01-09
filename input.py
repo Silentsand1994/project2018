@@ -57,7 +57,7 @@ def word2vec_train(x, m, file_path):
         f.close()
 
     word = word2vec.LineSentence('vocab')
-    models = Word2Vec(word, size=14, window=m, min_count=1)
+    models = Word2Vec(word, size=14, window=m, min_count=1) #Size 可調整 -> 碼字向量維度
 
     data = np.zeros(shape=(num, m, 14))
     for i in range(0, num-1):
@@ -139,5 +139,6 @@ def load_data(path):
 a, b, c, d = load_data("wav")
 
 with open("output_test", "w") as f:
+    json.dump(a.shape, f)
     json_tricks.dump(a, f)
     f.close()
