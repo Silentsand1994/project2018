@@ -21,3 +21,18 @@ test accuracy:  0.22196969697
 test loss:  2.07574932503
 
 test accuracy:  0.22196969697
+
+test loss:  2.06856145136
+
+test accuracy:  0.22196969697
+
+
+1層softmax，feature向量=14，feature map = 200
+test loss:  0.5022644052
+
+test accuracy:  0.806818181818
+
+1層softmax，feature向量=20，feature map = 200
+test loss:  0.345186829025
+
+test accuracy:  0.882575757576
