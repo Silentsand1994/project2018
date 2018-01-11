@@ -17,13 +17,13 @@ y_test = np_utils.to_categorical(y_test, num_classes=cate)
 
 model = Sequential()
 
-# Conv layer
+# Convlayer
 model.add(Convolution2D(
     batch_input_shape=(None, 1, frame, 20),
     filters=20,
     kernel_size=(2, 1),
     strides=1,
-    padding='same',     # Padding method
+    padding='same',
     data_format='channels_first',
 ))
 model.add(Activation('relu'))
@@ -32,7 +32,7 @@ model.add(Activation('relu'))
 model.add(MaxPooling2D(
     pool_size=(2, 1),
     strides=2,
-    padding='same',    # Padding method
+    padding='same',
     data_format='channels_first',
 ))
 
@@ -50,12 +50,30 @@ model.compile(optimizer=adam,
 
 print('Training ------------')
 
-# Another way to train the model
 model.fit(X_train, y_train, epochs=10, batch_size=12,)
 
 print('\nTesting ------------')
-# Evaluate the model with the metrics we defined earlier
+
 loss, accuracy = model.evaluate(X_test, y_test)
 
 print('\ntest loss: ', loss)
 print('\ntest accuracy: ', accuracy)
+
+print("\nTraning round 2--------")
+print(X_test.shape)
+print(y_test.shape)
+model.train_on_batch(X_test, y_test)
+
+print('\nTesting ------------')
+
+loss, accuracy = model.evaluate(X_test, y_test)
+
+print('\ntest loss: ', loss)
+print('\ntest accuracy: ', accuracy)
+
+with open("predict_data", "w") as f:
+    f.write(str(model.predict(X_test)))
+    f.close()
+
+
+
