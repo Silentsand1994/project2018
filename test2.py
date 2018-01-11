@@ -50,12 +50,29 @@ model.compile(optimizer=adam,
 
 print('Training ------------')
 
-# Another way to train the model
 model.fit(X_train, y_train, epochs=10, batch_size=12,)
 
 print('\nTesting ------------')
-# Evaluate the model with the metrics we defined earlier
+
 loss, accuracy = model.evaluate(X_test, y_test)
 
 print('\ntest loss: ', loss)
 print('\ntest accuracy: ', accuracy)
+
+print("\nTraning round 2--------")
+print(X_test.shape)
+print(y_test.shape)
+model.train_on_batch(X_test, y_test)
+
+print('\nTesting ------------')
+
+loss, accuracy = model.evaluate(X_test, y_test)
+
+print('\ntest loss: ', loss)
+print('\ntest accuracy: ', accuracy)
+
+print("Priecting")
+print(model.predict(X_test, 12))
+
+
+

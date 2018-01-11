@@ -9,12 +9,18 @@ import pickle
 from gensim.models import Word2Vec, word2vec
 
 
-def get_feature(path, flag=False, frame=None):
+def get_feature(path, flag=False, m_frame=None):
     print(path)
     y, sr = librosa.load(path)
+
+    y = np.resize(y, (int(y.shape[0]/511), 511))
     if not flag:
         frame = y.shape[0]
-    y = np.resize(y, (int(frame/511), 511))
+    else:
+        if y.shape[0] > m_frame:
+            frame = m_frame
+        else:
+            frame = y.shape[0]
 
     features = np.zeros((frame, 14), dtype=y.dtype)
 
@@ -37,7 +43,7 @@ def get_feature(path, flag=False, frame=None):
         features[x][12] = temp[10]
         features[x][13] = temp[11]
 
-    return (features, frame)
+    return features, frame
 
 
 def word2vec_train(x, m):
@@ -161,11 +167,3 @@ def load_data(path):
         data1, data2, max_f, dic = a
 
     return data1, data2, max_f, len(dic)
-
-
-a, b, c, d = load_data("wav")
-
-with open("output_test", "w") as f:
-    json.dump(a.shape, f)
-    json_tricks.dump(a, f)
-    f.close()
