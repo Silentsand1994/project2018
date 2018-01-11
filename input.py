@@ -89,7 +89,7 @@ def load_data(path):
         flag = True
         with open("bin/Max_frame", "r") as f:
             max_f = int(f.read())
-        
+
     files = listdir("data_path")
 
     if path not in files:
