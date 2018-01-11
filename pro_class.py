@@ -1,4 +1,4 @@
-from os import listdir
+from os import listdir,remove
 from sklearn.cluster import KMeans
 import librosa
 from os.path import join
@@ -10,20 +10,27 @@ from gensim.models import Word2Vec, word2vec
 
 
 class EmotionData:
-    data1 = None
-    data2 = None
-    max_f = 0
-    flag = False
-    dic = {}
-    kmeans = None
-    models = None
+    def __init__(self):
+        self.max_f = 0
+        self.flag = False
+        self.dic = {}
+        self.kmeans = None
+        self.models = None
+        self.m_size = 20
+        self.feature_map = 200
 
-    def get_feature(self, path, flag=False):
+    def __del__(self):
+        files = listdir("data_path")
+        for path in files:
+            file_path = join("data_path", path)
+            remove(file_path)
+
+    def get_feature(self, path):
         print(path)
         y, sr = librosa.load(path)
 
         y = np.resize(y, (int(y.shape[0] / 511), 511))
-        if not flag:
+        if not self.flag:
             frame = y.shape[0]
         else:
             frame = self.max_f
@@ -51,39 +58,29 @@ class EmotionData:
 
         return features, frame
 
-    def word2vec_train(self, x, m):
+    def word2vec_train(self, x):
         num = x.shape[0]
         x = x.tolist()
         word = ""
-        file_path = "word_vector"
-        files = listdir("bin")
-        if file_path not in files:
-            file_path = join("bin", file_path)
-            for i in range(0, num - 1):
-                for j in range(0, m - 1):
-                    word = word + str(int(x[i][j])) + " "
-                word = word + "\n"
-                print("loading:", i)
 
-            with open("vocab", "w") as f:
-                f.write(word)
-                f.close()
-
-            word = word2vec.LineSentence('vocab')
-            models = Word2Vec(word, size=20, window=m, min_count=1)  # Size 可調整 -> 碼字向量維度
-        else:
-            file_path = join("bin", file_path)
-            models = Word2Vec.load(file_path)
-
-        data = np.zeros(shape=(num, m, 20))
         for i in range(0, num - 1):
-            for j in range(0, m - 1):
-                a = str(x[i][j])
-                b = models.wv[a]
-                data[i][j] = b
+            for j in range(0, self.max_f - 1):
+                word = word + str(int(x[i][j])) + " "
+            word = word + "\n"
+            print("loading:", i)
 
-        models.save(file_path)
-        return data
+        with open("vocab", "w") as f:
+            f.write(word)
+            f.close()
+
+        word = word2vec.LineSentence('vocab')
+        self.models = Word2Vec(word, size=self.m_size, window=self.max_f, min_count=1)  # Size 可調整 -> 碼字向量維度
+
+        return
+
+    def set_kmeans(self,data):
+        self.kmeans = KMeans(n_clusters=self.feature_map).fit(data)
+        return
 
     def load_data(self, path):
         f_data = []
@@ -100,9 +97,9 @@ class EmotionData:
 
             for a in files:
                 file = join(path, a)
-                features, nframes = get_feature(file, flag, max_f)
-                if max_f < nframes:
-                    max_f = nframes
+                features, nframes = self.get_feature(file)
+                if self.max_f < nframes:
+                    self.max_f = nframes
                 b = a.strip("1234567890_")
                 b = b.split(".")
 
@@ -112,23 +109,23 @@ class EmotionData:
                     c_p = False
                 else:
                     data1 = np.vstack((data1, features))
-                if b[0] in dic:
-                    data2.append(dic.get(b[0]))
+                if b[0] in self.dic:
+                    data2.append(self.dic.get(b[0]))
                 else:
-                    dic[b[0]] = emotion
+                    self.dic[b[0]] = emotion
                     emotion = emotion + 1
-                    data2.append(dic.get(b[0]))
+                    data2.append(self.dic.get(b[0]))
 
                 count = count + 1
 
             print("Kmeans start----------------")
-            if self.kmeans:
-                self.kmeans = KMeans(n_clusters=200).fit(data1)
+            if not self.kmeans:
+                self.set_kmeans(data1)
 
             data = self.kmeans.predict(data1)
             p = 0
 
-            data1 = np.zeros(shape=(count, max_f), dtype=int)
+            data1 = np.zeros(shape=(count, self.max_f), dtype=int)
             for x in range(0, count - 1):
                 nframes = f_data[x]
                 temp = 0
@@ -138,10 +135,20 @@ class EmotionData:
                 p = p + nframes
 
             print("word2vec start---------------")
-            data1 = word2vec_train(data1, max_f)
+            if not self.models:
+                self.word2vec_train(data1)
+
+            data = np.zeros(shape=(data1.shape[0], self.max_f, 20))
+            for i in range(0, data1.shape[0] - 1):
+                for j in range(0, self.max_f - 1):
+                    a = str(data1[i][j])
+                    b = self.models.wv[a]
+                    data[i][j] = b
+            data1 = data
+
             data2 = np.array(data2)
             with open(file_path, "w") as f:
-                json_tricks.dump((data1, data2, max_f, dic), f)
+                json_tricks.dump((data1, data2, self.max_f, self.dic), f)
                 f.close()
 
             self.flag = True
@@ -151,6 +158,10 @@ class EmotionData:
             f = open(file_path, "r")
             a = json_tricks.load(f)
             data1, data2, max_f, dic = a
+            if max_f != self.max_f:
+                print("error")
+            if dic != self.dic:
+                print("error")
 
-            return data1, data2, max_f, len(dic)
+            return data1, data2, self.max_f, len(self.dic)
 
