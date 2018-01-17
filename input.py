@@ -12,8 +12,7 @@ from gensim.models import Word2Vec, word2vec
 def get_feature(path, flag=False, m_frame=None):
     print(path)
     y, sr = librosa.load(path)
-
-    y = np.resize(y, (int(y.shape[0]/511), 511))
+    #y = np.resize(y, (int(y.shape[0]/511), 511))
     if not flag:
         frame = y.shape[0]
     else:
@@ -22,26 +21,34 @@ def get_feature(path, flag=False, m_frame=None):
         else:
             frame = y.shape[0]
 
-    features = np.zeros((frame, 14), dtype=y.dtype)
+    zero = librosa.feature.zero_crossing_rate(y=y)
+    rmse = librosa.feature.rmse(y=y)
+    temp = librosa.feature.mfcc(y=y, n_mfcc=12)
+    features = np.vstack((zero,rmse,temp))
+    features = features.transpose()
+    frame = features.shape[0]
+    #for x in range(0, frame-1):
+        #print(y[x].shape)
+        #zero = librosa.zero_crossings(y[x])
+        #zero = zero.tolist()
+        #features[x][0] = zero.count(True)
+        #print(librosa.feature.rmse(y=y[x]))
+        #features[x][1] = librosa.feature.rmse(y=y[x])
+        #temp = librosa.feature.mfcc(y=y[x], n_mfcc=12)
 
-    for x in range(0, frame-1):
-        zero = librosa.zero_crossings(y[x])
-        zero = zero.tolist()
-        features[x][0] = zero.count(True)
-        features[x][1] = librosa.feature.rmse(y=y[x])
-        temp = librosa.feature.mfcc(y=y[x], n_mfcc=12)
-        features[x][2] = temp[0]
-        features[x][3] = temp[1]
-        features[x][4]= temp[2]
-        features[x][5] = temp[3]
-        features[x][6] = temp[4]
-        features[x][7] = temp[5]
-        features[x][8] = temp[6]
-        features[x][9] = temp[7]
-        features[x][10] = temp[8]
-        features[x][11] = temp[9]
-        features[x][12] = temp[10]
-        features[x][13] = temp[11]
+        #features[x][2] = temp[0]
+        #features[x][3] = temp[1]
+        #features[x][4]= temp[2]
+        #features[x][5] = temp[3]
+        #features[x][6] = temp[4]
+        #features[x][7] = temp[5]
+        #features[x][8] = temp[6]
+        #features[x][9] = temp[7]
+        #features[x][10] = temp[8]
+        #features[x][11] = temp[9]
+        #features[x][12] = temp[10]
+        #features[x][13] = temp[11]
+
 
     return features, frame
 
