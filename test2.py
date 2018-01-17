@@ -8,15 +8,12 @@ import input
 (X_train, y_train, frame, cate) = input.load_data("wav")
 (X_test, y_test, t_frame, cate) = input.load_data("test")
 
-# data pre-processing
 X_train = X_train.reshape(-1, 1, frame, 20)
 X_test = X_test.reshape(-1, 1, t_frame, 20)
 y_train = np_utils.to_categorical(y_train, num_classes=cate)
 y_test = np_utils.to_categorical(y_test, num_classes=cate)
 
-
 model = Sequential()
-
 # Convlayer
 model.add(Convolution2D(
     batch_input_shape=(None, 1, frame, 20),
@@ -50,7 +47,7 @@ model.compile(optimizer=adam,
 
 print('Training ------------')
 
-model.fit(X_train, y_train, epochs=10, batch_size=12,)
+model.fit(X_train, y_train, epochs=10)
 
 print('\nTesting ------------')
 
@@ -60,9 +57,8 @@ print('\ntest loss: ', loss)
 print('\ntest accuracy: ', accuracy)
 
 print("\nTraning round 2--------")
-print(X_test.shape)
-print(y_test.shape)
-model.train_on_batch(X_test, y_test)
+
+model.fit(X_test, y_test, epochs=3)
 
 print('\nTesting ------------')
 
