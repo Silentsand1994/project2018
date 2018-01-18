@@ -20,20 +20,15 @@ class EmotionData:
         self.feature_map = 200
 
     def __del__(self):
-        files = listdir("data_path")
+        files = listdir("bin/data_path")
         for path in files:
-            file_path = join("data_path", path)
+            file_path = join("bin/data_path", path)
             remove(file_path)
+
 
     def get_feature(self, path):
         print(path)
         y, sr = librosa.load(path)
-
-        y = np.resize(y, (int(y.shape[0] / 511), 511))
-        if not self.flag:
-            frame = y.shape[0]
-        else:
-            frame = self.max_f
 
         zero = librosa.feature.zero_crossing_rate(y=y)
         rmse = librosa.feature.rmse(y=y)
@@ -60,8 +55,10 @@ class EmotionData:
             f.close()
 
         word = word2vec.LineSentence('vocab')
-        self.models = Word2Vec(word, size=self.m_size, window=self.max_f, min_count=1)  # Size 可調整 -> 碼字向量維度
 
+        self.models = Word2Vec(word, size=self.m_size, window=self.max_f, min_count=1)  # Size 可調整 -> 碼字向量維度
+        remove('vocab')
+        print("word2vec set end")
         return
 
     def set_kmeans(self,data):
@@ -75,10 +72,10 @@ class EmotionData:
         count = 0
         emotion = 0
 
-        files = listdir("data_path")
+        files = listdir("bin/data_path")
 
         if path not in files:
-            file_path = join("data_path", path)
+            file_path = join("bin/data_path", path)
             files = listdir(path)
 
             for a in files:
@@ -125,11 +122,10 @@ class EmotionData:
                 self.word2vec_train(data1)
 
             data = np.zeros(shape=(data1.shape[0], self.max_f, 20))
-            for i in range(0, data1.shape[0] - 1):
-                for j in range(0, self.max_f - 1):
-                    a = str(data1[i][j])
-                    b = self.models.wv[a]
-                    data[i][j] = b
+            for i in range(0, data1.shape[0]):
+                for j in range(0, self.max_f):
+                    data[i][j] = self.models.wv[str(data1[i][j])]
+
             data1 = data
 
             data2 = np.array(data2)
@@ -140,7 +136,7 @@ class EmotionData:
             self.flag = True
 
         else:
-            file_path = join("data_path", path)
+            file_path = join("bin/data_path", path)
             f = open(file_path, "r")
             a = json_tricks.load(f)
             data1, data2, max_f, dic = a
@@ -149,5 +145,10 @@ class EmotionData:
             if dic != self.dic:
                 print("error")
 
-            return data1, data2, self.max_f, len(self.dic)
+        return data1, data2
 
+    def get_Cate(self):
+        return len(self.dic)
+
+    def get_nFrame(self):
+        return self.max_f

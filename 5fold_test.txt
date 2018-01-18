@@ -1,0 +1,16 @@
+
+Round0
+test loss: 1.60869966324
+test accuracy: 0.50375939872
+Round1
+test loss: 1.78348718729
+test accuracy: 0.428571428683
+Round2
+test loss: 1.01646643765
+test accuracy: 0.633962264826
+Round3
+test loss: 1.22355175608
+test accuracy: 0.536121673117
+Round4
+test loss: 1.15288267136
+test accuracy: 0.530769230769
